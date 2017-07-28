@@ -105,6 +105,15 @@
       app.container.appendChild(card);
       app.visibleCards[data.key] = card;
     }
+
+    // 確認data 時間
+    var dateElem = card.querySelector('.date');
+    if (dateElem.getAttribute('data-dt') >= data.currently.time) {
+      return;
+    }
+    dateElem.setAttribute('data-dt', data.currently.time);
+    dateElem.textContent = new Date(data.currently.time * 1000);
+    
     card.querySelector('.description').textContent = data.currently.summary;
     card.querySelector('.date').textContent =
       new Date(data.currently.time * 1000);
@@ -154,6 +163,18 @@
   // Gets a forecast for a specific city and update the card with the data
   app.getForecast = function(key, label) {
     var url = weatherAPIUrlBase + key + '.json';
+    // 使用cache
+    if ('caches' in window) {
+      caches.match(url).then(function(response){
+        if(response) {
+          response.json().then(function(json){
+            json.key = key;
+            json.label = label;
+            app.updateForecastCard(json);
+          });
+        }
+      });
+    }
     // Make the XHR to get the data, then update the card
     var request = new XMLHttpRequest();
     request.onreadystatechange = function() {

@@ -1,4 +1,5 @@
-var cacheName ='weatherPWA-v1';
+var cacheName ='weatherPWA-v2';
+var dataCacheName = 'weatherData-v2';
 var filesToCache = [
   '/',
   '/index.html',
@@ -19,6 +20,7 @@ var filesToCache = [
   '/images/thunderstorm.png',
   '/images/wind.png'
 ];
+var weatherAPIUrlBase = 'https://publicdata-weather.firebaseio.com/';
 // 當更新sw時 需要更新resource到cache
 self.addEventListener('install', function(e) {
   console.log('[ServiceWorker] Install');
@@ -35,7 +37,7 @@ self.addEventListener('activate', function(e) {
   e.waitUntil(
     caches.keys().then(function(keyList) {
       return Promise.all(keyList.map(function(key) {
-        if (key !== cacheName) {
+        if (key !== cacheName && key !== dataCacheName) {
           console.log('[ServiceWorker] Removing old cache', key);
           return caches.delete(key);
         }
@@ -45,10 +47,26 @@ self.addEventListener('activate', function(e) {
 });
 // 當網路有通時更新
 self.addEventListener('fetch', function(e) {
-  console.log('[ServiceWorker] Fetch', e.request.url);
-  e.respondWith(
-    caches.match(e.request).then(function(response) {
-      return response || fetch(e.request);
-    })
-  );
+  
+  if(e.request.url.startsWith(weatherAPIUrlBase)){
+    e.respondWith(
+      fetch(e.request)
+        .then(function(response){
+            return caches.open(dataCacheName).then(function(cache){
+                cache.put(e.request.url, response.clone());
+                console.log('[ServiceWorker] Fetch & Cached', e.request.url);
+                return response;
+            })
+        })  
+    );
+  }
+  else {
+    e.respondWith(
+        caches.match(e.request).then(function(response) {
+        console.log('[ServiceWorker] Fetch only', e.request.url);
+        return response || fetch(e.request);
+        })
+    );
+  }
+  
 });
