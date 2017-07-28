@@ -38,7 +38,7 @@ gulp.task('generate-sw', function() {
       }
     }]
   };
-  return swPrecache.write('./service-worker.js', swOptions);
+  return swPrecache.write('./service-worker-gn.js', swOptions);
 });
 
 gulp.task('serve', ['generate-sw'], function() {

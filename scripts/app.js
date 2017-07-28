@@ -113,7 +113,7 @@
     }
     dateElem.setAttribute('data-dt', data.currently.time);
     dateElem.textContent = new Date(data.currently.time * 1000);
-    
+
     card.querySelector('.description').textContent = data.currently.summary;
     card.querySelector('.date').textContent =
       new Date(data.currently.time * 1000);
@@ -223,7 +223,7 @@
   // 註冊serviceWorker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker
-     .register('/service-worker.js')
+     .register('/service-worker-gn.js')
      .then(function() { 
         console.log('Service Worker Registered'); 
       });
